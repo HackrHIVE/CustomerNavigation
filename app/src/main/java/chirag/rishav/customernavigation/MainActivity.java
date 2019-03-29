@@ -555,7 +555,8 @@ public class MainActivity extends AppCompatActivity {
 
         mediaPlayer = new MediaController(this);
         mediaPlayer.setAnchorView(mediaVideo);
-        Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+"/vid.mp4");
+//        Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+"/vid.mp4");
+        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getAbsolutePath()+"/vid.mp4");
         mediaVideo.setMediaController(mediaPlayer);
         mediaVideo.setVideoURI(uri);
         mediaVideo.requestFocus();
