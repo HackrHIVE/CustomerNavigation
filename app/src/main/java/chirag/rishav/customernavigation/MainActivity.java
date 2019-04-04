@@ -481,16 +481,19 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionDeniedResponse;
 import com.karumi.dexter.listener.PermissionGrantedResponse;
 import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
 import java.net.URI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
@@ -527,13 +530,16 @@ public class MainActivity extends AppCompatActivity {
     VideoView mediaVideo;
     CardView container;
     MediaController mediaPlayer;
+    Thread videoThread;
+    String videoURL;
 
+    Bundle saved;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        saved = savedInstanceState;
         blockData = new BlockData(this);
         outputBlock = findViewById(R.id.updated_on);
         mediaVideo = findViewById(R.id.mediaVideo);
@@ -542,15 +548,23 @@ public class MainActivity extends AppCompatActivity {
         init();
         mediaPlayer = new MediaController(this);
         mediaPlayer.setAnchorView(mediaVideo);
-//        Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+"/vid.mp4");
-        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getAbsolutePath()+"/vid.mp4");
-        mediaVideo.setMediaController(mediaPlayer);
-        mediaVideo.setVideoURI(uri);
-        mediaVideo.requestFocus();
-        mediaVideo.start();
+        Dexter.withActivity(this)
+                .withPermissions(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_EXTERNAL_STORAGE)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
+                        mRequestingLocationUpdates = true;
+                        startLocationUpdates();
+                        init1();
+                    }
 
-        // restore the values from saved instance state
-        restoreValuesFromBundle(savedInstanceState);
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        openSettings();
+                        token.continuePermissionRequest();
+                    }
+                }).check();
+
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
@@ -566,29 +580,35 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void init1(){
+
+        Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+"/vid.mp4");
+//        Uri uri = Uri.parse(Environment.getExternalStorageDirectory().getAbsolutePath()+"/vid.mp4");
+        mediaVideo.setMediaController(mediaPlayer);
+        mediaVideo.setVideoURI(uri);
+        mediaVideo.requestFocus();
+        mediaVideo.start();
+
+        // restore the values from saved instance state
+        restoreValuesFromBundle(saved);
+
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
         Dexter.withActivity(this)
-                .withPermission(Manifest.permission.ACCESS_FINE_LOCATION)
-                .withListener(new PermissionListener() {
+                .withPermissions(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.READ_EXTERNAL_STORAGE)
+                .withListener(new MultiplePermissionsListener() {
                     @Override
-                    public void onPermissionGranted(PermissionGrantedResponse response) {
+                    public void onPermissionsChecked(MultiplePermissionsReport report) {
                         mRequestingLocationUpdates = true;
                         startLocationUpdates();
                     }
 
                     @Override
-                    public void onPermissionDenied(PermissionDeniedResponse response) {
-                        if (response.isPermanentlyDenied()) {
-                            // open device settings when the permission is
-                            // denied permanently
-                            openSettings();
-                        }
-                    }
-
-                    @Override
-                    public void onPermissionRationaleShouldBeShown(PermissionRequest permission, PermissionToken token) {
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> permissions, PermissionToken token) {
+                        openSettings();
                         token.continuePermissionRequest();
                     }
                 }).check();
@@ -599,6 +619,7 @@ public class MainActivity extends AppCompatActivity {
         mediaVideo.pause();
         t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null);
         container.setVisibility(View.VISIBLE);
+        videoThread.stop();
         t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {
@@ -610,6 +631,17 @@ public class MainActivity extends AppCompatActivity {
                 t1.stop();
                 mediaVideo.resume();
                 container.setVisibility(View.INVISIBLE);
+                videoThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+videoURL);
+                        mediaVideo.setMediaController(mediaPlayer);
+                        mediaVideo.setVideoURI(uri);
+                        mediaVideo.requestFocus();
+                        mediaVideo.start();
+                    }
+                });
+                videoThread.start();
             }
 
             @Override
@@ -697,6 +729,8 @@ public class MainActivity extends AppCompatActivity {
                     Log.i("DATA:", String.valueOf(data));
                     Blocks blocks = blocks_list.get(index);
                     StringBuffer content = blocks.overview;
+                    VideoSelector videoSelector = new VideoSelector(data);
+                    videoURL = videoSelector.getURL();
                     SpeakOutLoud(content);
                     lastLocation = data;
                 }
