@@ -431,15 +431,7 @@ package chirag.rishav.customernavigation;
 //    }
 //
 //
-//    @Override
-//    protected void onPause() {
-//        super.onPause();
 //
-//        if (mRequestingLocationUpdates) {
-//            // pausing location updates
-//            stopLocationUpdates();
-//        }
-//    }
 //}
 
 import android.Manifest;
@@ -548,11 +540,6 @@ public class MainActivity extends AppCompatActivity {
         container = findViewById(R.id.containerLocation);
         // initialize the necessary libraries
         init();
-
-        TextView tx = findViewById(R.id.updated_on);
-        Typeface custom_font = Typeface.createFromAsset(getAssets(),  "fonts/salvalyn_demo.ttf");
-        tx.setTypeface(custom_font);
-
         mediaPlayer = new MediaController(this);
         mediaPlayer.setAnchorView(mediaVideo);
 //        Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+"/vid.mp4");
