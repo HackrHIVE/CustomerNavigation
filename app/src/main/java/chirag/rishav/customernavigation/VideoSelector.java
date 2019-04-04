@@ -11,6 +11,8 @@ public class VideoSelector {
 
     VideoSelector(String blockName){
         this.blockName = blockName;
+        name = new ArrayList<>();
+        url = new ArrayList<>();
         name.add("Block 1 & 2");
         url.add("2_1.mp4");
         name.add("Block 3 & 3A");
