@@ -612,43 +612,86 @@ public class MainActivity extends AppCompatActivity {
                         token.continuePermissionRequest();
                     }
                 }).check();
+
     }
 
     public void SpeakOutLoud(StringBuffer tospeak)
     {
-        mediaVideo.pause();
-        t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null);
-        container.setVisibility(View.VISIBLE);
-        videoThread.stop();
-        t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+
+        UtteranceProgressListener utteranceProgressListener = new UtteranceProgressListener() {
             @Override
             public void onStart(String utteranceId) {
 
+                Log.i("TTS:","Chaalu hogya re!");
             }
 
             @Override
             public void onDone(String utteranceId) {
-                t1.stop();
-                mediaVideo.resume();
+                Log.i(TAG,"in OnDone()");
+//                t1.stop();
+//                mediaVideo.resume();
                 container.setVisibility(View.INVISIBLE);
-                videoThread = new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+videoURL);
-                        mediaVideo.setMediaController(mediaPlayer);
-                        mediaVideo.setVideoURI(uri);
-                        mediaVideo.requestFocus();
-                        mediaVideo.start();
-                    }
-                });
-                videoThread.start();
+                Log.i("VISIBILITY : ",String.valueOf(container.VISIBLE));
+                mediaVideo.setVisibility(View.VISIBLE);
+                Log.i(TAG,"InrunVideo()");
+                Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+videoURL);
+                Log.i(TAG,uri.toString());
+                mediaVideo.stopPlayback();
+                mediaPlayer = new MediaController(MainActivity.this);
+                mediaVideo.setMediaController(mediaPlayer);
+                mediaVideo.setVideoURI(uri);
+                mediaVideo.requestFocus();
+                mediaVideo.start();
+//                runVideo();
+
             }
 
             @Override
             public void onError(String utteranceId) {
 
             }
-        });
+        };
+        t1.setOnUtteranceProgressListener(utteranceProgressListener);
+
+
+
+        mediaVideo.pause();
+        container.setVisibility(View.VISIBLE);
+        t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null);
+//        videoThread.stop();
+//        t1.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+//            @Override
+//            public void onStart(String utteranceId) {
+//            Log.i("TTS:","Chaalu hogya re!");
+//            }
+//
+//            @Override
+//            public void onDone(String utteranceId) {
+//                Log.i(TAG,"in OnDone()");
+////                t1.stop();
+////                mediaVideo.resume();
+//                container.setVisibility(View.INVISIBLE);
+//                Log.i("VISIBILITY : ",String.valueOf(container.VISIBLE));
+//                mediaVideo.setVisibility(View.VISIBLE);
+//                Log.i(TAG,"InrunVideo()");
+//                Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+videoURL);
+//                Log.i(TAG,uri.toString());
+//                mediaVideo.stopPlayback();
+//                mediaPlayer = new MediaController(MainActivity.this);
+//                mediaVideo.setMediaController(mediaPlayer);
+//                mediaVideo.setVideoURI(uri);
+//                mediaVideo.requestFocus();
+//                mediaVideo.start();
+////                runVideo();
+//            }
+//
+//            @Override
+//            public void onError(String utteranceId) {
+//
+//            }
+//        });
+
+//        this.t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null);
 
     }
 
