@@ -156,8 +156,7 @@ public class MainActivity extends AppCompatActivity {
                         token.continuePermissionRequest();
                     }
                 }).check();
-
-
+        
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.DONUT) {
             t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {

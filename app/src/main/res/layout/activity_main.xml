@@ -30,16 +30,6 @@
         app:layout_constraintTop_toTopOf="parent"
         />
 
-    <!--<io.alterac.blurkit.BlurLayout-->
-        <!--android:id="@+id/blurLayout"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:visibility="invisible"-->
-        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--app:layout_constraintEnd_toEndOf="parent"-->
-        <!--app:layout_constraintStart_toStartOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent" />-->
-
     <androidx.cardview.widget.CardView
         android:id="@+id/containerLocation"
         android:layout_width="match_parent"
