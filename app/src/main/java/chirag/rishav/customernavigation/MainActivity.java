@@ -31,6 +31,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -105,9 +106,9 @@ public class MainActivity extends AppCompatActivity {
     Thread videoThread;
     String videoURL;
     ArrayList<String> vidsURL;
+    MediaPlayer currentMP;
     Bundle saved;
-//    BlurLayout blurLayout;
-    BlurringView blurringView;
+    ImageView blocker;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,9 +117,7 @@ public class MainActivity extends AppCompatActivity {
         blockData = new BlockData(this);
         outputBlock = findViewById(R.id.updated_on);
         mediaVideo = findViewById(R.id.mediaVideo);
-//        blurLayout = findViewById(R.id.blurLayout);
-        blurringView = findViewById(R.id.blurring);
-        blurringView.setBlurredView(mediaVideo);
+        blocker = findViewById(R.id.blocker);
         mediaVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
@@ -133,6 +132,13 @@ public class MainActivity extends AppCompatActivity {
                         mediaVideo.start();
                     }
                 },500);
+            }
+        });
+        mediaVideo.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mp) {
+                mp.setVolume(1,1);
+                currentMP = mp;
             }
         });
         container = findViewById(R.id.containerLocation);
@@ -206,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void SpeakOutLoud(StringBuffer tospeak)
+    public void SpeakOutLoud(final StringBuffer tospeak)
     {
 
         final UtteranceProgressListener utteranceProgressListener = new UtteranceProgressListener() {
@@ -224,8 +230,8 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Log.i("in OnDone()","blur going invisible");
-//                        blurLayout.setVisibility(View.INVISIBLE);
-                        blurringView.setVisibility(View.INVISIBLE);
+                        currentMP.setVolume(1,1);
+                        blocker.setVisibility(View.INVISIBLE);
                         container.setVisibility(View.INVISIBLE);
                     }
                 },500);
@@ -236,18 +242,18 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
+        t1.setOnUtteranceProgressListener(utteranceProgressListener);
+        mediaVideo.pause();
+        blocker.setVisibility(View.VISIBLE);
+        container.setVisibility(View.VISIBLE);
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                t1.setOnUtteranceProgressListener(utteranceProgressListener);
+                t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null,"Hello");
             }
         } , 500);
-//        blurLayout.setVisibility(View.VISIBLE);
-        blurringView.invalidate();
-        blurringView.setVisibility(View.VISIBLE);
-        container.setVisibility(View.VISIBLE);
+
 //        t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null);
-        this.t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null,"Hello");
 
     }
 

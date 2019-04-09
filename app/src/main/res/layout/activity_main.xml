@@ -19,16 +19,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.fivehundredpx.android.blur.BlurringView
+    <ImageView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:id="@+id/blocker"
         android:visibility="invisible"
-        android:id="@+id/blurring"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        />
+        android:background="#B3201F1F"
+        android:layout_height="match_parent" />
 
     <androidx.cardview.widget.CardView
         android:id="@+id/containerLocation"
@@ -58,7 +54,7 @@
                 android:fontFamily="@font/caviardreams"
                 android:text="Getting your location!"
                 android:textColor="#fff"
-                android:textSize="25dp"
+                android:textSize="35dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
