@@ -63,12 +63,14 @@ import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 import com.karumi.dexter.listener.single.PermissionListener;
 
+import java.io.IOException;
 import java.net.URI;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -106,9 +108,17 @@ public class MainActivity extends AppCompatActivity {
     Thread videoThread;
     String videoURL;
     ArrayList<String> vidsURL;
-    MediaPlayer currentMP;
     Bundle saved;
     ImageView blocker;
+
+    MediaPlayer mediaAudioPlayer;
+    ArrayList<String> listSongs;
+
+    public String returnRandom(){
+        int rnd = new Random().nextInt(listSongs.size());
+        return listSongs.get(rnd);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,29 +126,32 @@ public class MainActivity extends AppCompatActivity {
         saved = savedInstanceState;
         blockData = new BlockData(this);
         outputBlock = findViewById(R.id.updated_on);
+        createList();
+        mediaAudioPlayer = MediaPlayer.create(this,R.raw.mu_1);
+        mediaAudioPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                Uri uri = Uri.parse("android.resource://chirag.rishav.customernavigation/raw/"+returnRandom());
+                try {
+                    mediaAudioPlayer.setDataSource(MainActivity.this,uri);
+                    mediaAudioPlayer.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        mediaAudioPlayer.start();
         mediaVideo = findViewById(R.id.mediaVideo);
         blocker = findViewById(R.id.blocker);
         mediaVideo.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        VideoSelector videoSelector = new VideoSelector();
-                        Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+videoSelector.getURL());
-                        mediaVideo.setMediaController(mediaPlayer);
-                        mediaVideo.setVideoURI(uri);
-                        mediaVideo.requestFocus();
-                        mediaVideo.start();
-                    }
-                },500);
-            }
-        });
-        mediaVideo.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-            @Override
-            public void onPrepared(MediaPlayer mp) {
-                mp.setVolume(1,1);
-                currentMP = mp;
+                VideoSelector videoSelector = new VideoSelector();
+                Uri uri = Uri.parse(Environment.getExternalStorageDirectory()+videoSelector.getURL());
+                mediaVideo.setMediaController(mediaPlayer);
+                mediaVideo.setVideoURI(uri);
+                mediaVideo.requestFocus();
+                mediaVideo.start();
             }
         });
         container = findViewById(R.id.containerLocation);
@@ -176,6 +189,16 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
+    }
+
+    private void createList() {
+        listSongs = new ArrayList<>();
+        listSongs.add("mu_1");
+        listSongs.add("mu_2");
+        listSongs.add("mu_3");
+        listSongs.add("mu_4");
+        listSongs.add("mu_5");
+        listSongs.add("mu_6");
     }
 
     public void init1(){
@@ -226,15 +249,10 @@ public class MainActivity extends AppCompatActivity {
             public void onDone(String utteranceId) {
                 Log.i(TAG,"in OnDone()");
                 t1.stop();
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.i("in OnDone()","blur going invisible");
-                        currentMP.setVolume(1,1);
-                        blocker.setVisibility(View.INVISIBLE);
-                        container.setVisibility(View.INVISIBLE);
-                    }
-                },500);
+                Log.i("in OnDone()","blur going invisible");
+                blocker.setVisibility(View.INVISIBLE);
+                mediaAudioPlayer.setVolume(1,1);
+                container.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -243,16 +261,11 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         t1.setOnUtteranceProgressListener(utteranceProgressListener);
-        mediaVideo.pause();
         blocker.setVisibility(View.VISIBLE);
+        mediaAudioPlayer.setVolume(0,0);
         container.setVisibility(View.VISIBLE);
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null,"Hello");
-            }
-        } , 500);
 
+        t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null,"Hello");
 //        t1.speak(tospeak.toString(),TextToSpeech.QUEUE_ADD,null);
 
     }
